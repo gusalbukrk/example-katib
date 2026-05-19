@@ -12,7 +12,7 @@ spec:
       # - train-mae
       # - mae
   algorithm:
-    algorithmName: random
+    algorithmName: multivariate-tpe
   maxTrialCount: 12
   parallelTrialCount: 2
   parameters:
