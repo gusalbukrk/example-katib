@@ -1,0 +1,58 @@
+apiVersion: kubeflow.org/v1beta1
+kind: Experiment
+metadata:
+  name: time-series-tree-tuning
+  namespace: kubeflow
+spec:
+  objective:
+    type: minimize
+    objectiveMetricName: mse
+    additionalMetricNames:
+      # - train-mse
+      # - train-mae
+      # - mae
+  algorithm:
+    algorithmName: random
+  maxTrialCount: 12
+  parallelTrialCount: 2
+  parameters:
+    - name: max_depth
+      parameterType: int
+      feasibleSpace: {min: "2", max: "20"}
+    - name: min_samples_split
+      parameterType: int
+      feasibleSpace: {min: "2", max: "40"}
+    - name: window_size
+      parameterType: int
+      feasibleSpace: {min: "5", max: "30"}
+    - name: min_samples_leaf
+      parameterType: int
+      feasibleSpace: {min: "1", max: "20"}
+  trialTemplate:
+    primaryContainerName: training-container
+    trialParameters:
+      - name: max_depth
+        reference: max_depth
+      - name: min_samples_split
+        reference: min_samples_split
+      - name: window_size
+        reference: window_size
+      - name: min_samples_leaf
+        reference: min_samples_leaf
+    trialSpec:
+      apiVersion: batch/v1
+      kind: Job
+      spec:
+        template:
+          spec:
+            containers:
+              - name: training-container
+                image: gusalbukrk/iris-train:v3
+                imagePullPolicy: IfNotPresent
+                command: ["python", "-u", "/app/train.py"]
+                args:
+                  - "${trialParameters.max_depth}"
+                  - "${trialParameters.min_samples_split}"
+                  - "${trialParameters.window_size}"
+                  - "${trialParameters.min_samples_leaf}"
+            restartPolicy: Never
