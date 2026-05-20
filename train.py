@@ -21,6 +21,8 @@ def main():
     time_series = pd.read_csv(url)['Temp'].values
 
     # 2. Dynamic Sliding Window
+    # transforms a raw 1D time-series array into a tabular format using a sliding window
+    # 3650 rows => 3640x10 matrix
     X_seq, y_seq = [], []
     for i in range(len(time_series) - window_size):
         X_seq.append(time_series[i : i + window_size])
